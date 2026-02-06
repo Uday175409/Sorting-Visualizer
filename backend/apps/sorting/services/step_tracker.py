@@ -7,24 +7,57 @@ class StepTracker:
         self.comparisons = 0
         self.swaps = 0
         self.start_time = time.perf_counter()
-        self.initial_array = []
+
+    def _append_step(self, array, step_type, indices, description=""):
+        self.steps.append({
+            "array": copy.deepcopy(array),
+            "type": step_type,
+            "indices": indices,
+            "description": description,
+            "comparisons": self.comparisons,
+            "swaps": self.swaps
+        })
 
     def log_initial_state(self, array):
-        self.initial_array = copy.deepcopy(array)
-        self.steps.append(copy.deepcopy(array))
+        self._append_step(array, "initial", [], "Initial State")
 
-    def log_comparison(self):
+    def log_comparison(self, indices, array):
+        """
+        Log a comparison event.
+        indices: list of indices being compared e.g. [0, 1]
+        """
         self.comparisons += 1
+        vals = []
+        # Safe value extraction
+        for idx in indices:
+            if 0 <= idx < len(array):
+                vals.append(str(array[idx]))
+            else:
+                vals.append("?")
+        
+        description = f"Comparing {', '.join(vals)}"
+        self._append_step(array, "comparison", indices, description)
 
-    def log_swap(self):
+    def log_swap(self, indices, array):
+        """
+        Log a swap event.
+        indices: list of indices being swapped e.g. [0, 1]
+        """
         self.swaps += 1
+        description = f"Swapping indices {indices[0]} and {indices[1]}"
+        self._append_step(array, "swap", indices, description)
 
-    def log_step(self, array):
+    def log_overwrite(self, indices, array, value):
         """
-        Log the current state of the array.
-        Ideally called after a swap or significant modification.
+        Log a value overwrite (mainly for Merge Sort).
         """
-        self.steps.append(copy.deepcopy(array))
+        # We assume overwrite counts as a 'swap' or 'move' operation conceptually for complexity tracking 
+        # but maybe we don't increment swap count strictly if it's merge sort? 
+        # Strictly merge sort has array assignments. 
+        # We will not increment swap here to keep traditional metrics clean, or we can add 'assignments'.
+        # For visualization, we treat it as a step.
+        description = f"Overwriting index {indices[0]} with {value}"
+        self._append_step(array, "overwrite", indices, description)
 
     def finalize(self, array):
         """
@@ -33,9 +66,8 @@ class StepTracker:
         end_time = time.perf_counter()
         execution_time_ms = (end_time - self.start_time) * 1000
         
-        # Ensure the final sorted state is recorded last if not already
-        if not self.steps or self.steps[-1] != array:
-            self.steps.append(copy.deepcopy(array))
+        # Ensure the final sorted state is recorded
+        self._append_step(array, "finished", [], "Sorting Complete")
 
         return {
             "steps": self.steps,

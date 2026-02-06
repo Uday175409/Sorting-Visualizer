@@ -18,7 +18,7 @@ class SortRequestSerializer(serializers.Serializer):
     speed = serializers.CharField(required=False, default="medium")
 
 class SortResponseSerializer(serializers.Serializer):
-    steps = serializers.ListField(child=serializers.ListField(child=serializers.IntegerField()))
+    steps = serializers.ListField(child=serializers.DictField()) # Changed from child ListField to DictField
     sorted_array = serializers.ListField(child=serializers.IntegerField())
     metrics = serializers.DictField()
     complexity = serializers.DictField()

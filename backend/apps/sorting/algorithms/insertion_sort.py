@@ -5,27 +5,23 @@ def insertion_sort(array):
     tracker.log_initial_state(array)
     n = len(array)
     
-    # Traverse through 1 to len(array)
     for i in range(1, n):
         key = array[i]
         j = i - 1
         
-        # Move elements of array[0..i-1], that are greater than key,
-        # to one position ahead of their current position
+        # We assume comparison with key is effectively comparison with index i (initially)
+        # But since key is separate, we highlight j to show we are looking at it.
+        
         while j >= 0:
-            tracker.log_comparison()
+            tracker.log_comparison([j], array)
             if array[j] > key:
                 array[j + 1] = array[j]
-                tracker.log_swap() # Log assignment as a swap/move
-                tracker.log_step(array)
+                tracker.log_overwrite([j + 1], array, array[j])
                 j -= 1
             else:
                 break
         
         array[j + 1] = key
-        # Only log a step if we actually did something significant effectively,
-        # but in insertion sort, placing the key back is part of the flow.
-        if j + 1 != i:
-             tracker.log_step(array)
+        tracker.log_overwrite([j + 1], array, key)
 
     return tracker.finalize(array)

@@ -10,18 +10,19 @@ def heap_sort(array):
         l = 2 * i + 1
         r = 2 * i + 2
         
-        tracker.log_comparison()
-        if l < n and arr[i] < arr[l]:
-            largest = l
+        if l < n:
+            tracker.log_comparison([i, l], arr)
+            if arr[l] > arr[largest]:
+                largest = l
             
-        tracker.log_comparison()
-        if r < n and arr[largest] < arr[r]:
-            largest = r
+        if r < n:
+            tracker.log_comparison([largest, r], arr)
+            if arr[r] > arr[largest]:
+                largest = r
             
         if largest != i:
             arr[i], arr[largest] = arr[largest], arr[i]
-            tracker.log_swap()
-            tracker.log_step(arr)
+            tracker.log_swap([i, largest], arr)
             heapify(arr, n, largest)
 
     # Build a maxheap
@@ -31,8 +32,7 @@ def heap_sort(array):
     # One by one extract elements
     for i in range(n - 1, 0, -1):
         array[i], array[0] = array[0], array[i]
-        tracker.log_swap()
-        tracker.log_step(array)
+        tracker.log_swap([i, 0], array)
         heapify(array, i, 0)
         
     return tracker.finalize(array)
